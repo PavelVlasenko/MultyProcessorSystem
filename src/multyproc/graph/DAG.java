@@ -26,7 +26,7 @@ public class DAG {
 		return new DAG(tasks);
 	}
 	
-	private DAG(List<Task> tasks) {
+	public DAG(List<Task> tasks) {
 		List<Task> currentTopList = new ArrayList<>();
 		
 		List<Task> topLevel = new ArrayList<>();

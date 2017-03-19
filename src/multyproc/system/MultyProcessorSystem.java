@@ -1,14 +1,18 @@
 package multyproc.system;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 
+import multyproc.Config;
+import multyproc.graph.DAG;
 import multyproc.task.Task;
 
 public class MultyProcessorSystem {
-	
+
+	/**
+	 * Map of dags with arrive time as parameter
+	 */
+	private LinkedHashMap<Long, DAG> dags;
+
 	private class Processor {
 		
 		private int number;
@@ -85,15 +89,17 @@ public class MultyProcessorSystem {
 	private int totalTaskCount;
 	private int totalComputationCost;
 	private int completedTaskCount;
-	private List<Task> sortedTaskList;
+	private List<Task> sortedTaskList = new ArrayList<>();
 
-	public MultyProcessorSystem(int processorCount) {
+	public MultyProcessorSystem(int processorCount, LinkedHashMap<Long, DAG> dags) {
 		if (processorCount <= 0) {
 			throw new IllegalArgumentException("Processor count");
 		}
 		for (int i = 0; i < processorCount; i++) {
 			processors.add(new Processor(i + 1));
 		}
+		this.dags = dags;
+		this.totalTaskCount = dags.size()* Config.taskCount;
 	}
 	
 	public void startSimulation() {
@@ -106,6 +112,7 @@ public class MultyProcessorSystem {
 		completedTaskCount = 0;
 		while (completedTaskCount < totalTaskCount) {
 			systemTime++;
+			processDag();
 			for (Processor processor : processors) {
 				processor.doProcessorWork();
 			}
@@ -114,12 +121,21 @@ public class MultyProcessorSystem {
 		System.out.println("total computation cost: " + totalComputationCost);
 		System.out.println("speedup: " + String.format("%.2f", 1.0 * totalComputationCost / systemTime));
 	}
+
+	private void processDag() {
+		if(dags.isEmpty()) {
+			return;
+		}
+		Map.Entry<Long, DAG> entry = dags.entrySet().iterator().next();
+		if(entry.getKey() >= systemTime) {
+			putTasks(entry.getValue().getSortedTaskList());
+			dags.remove(entry.getKey());
+		}
+	}
 	
 	public void putTasks(List<Task> sortedTaskList) {
-		this.sortedTaskList = sortedTaskList;
+		this.sortedTaskList.addAll(sortedTaskList);
 		int processorIndex = 0;
-		totalComputationCost = 0;
-		totalTaskCount = sortedTaskList.size();
 		for (Task task : sortedTaskList) {
 			totalComputationCost += task.getComputationCost();
 			Processor processor = getProcessor(processorIndex);
