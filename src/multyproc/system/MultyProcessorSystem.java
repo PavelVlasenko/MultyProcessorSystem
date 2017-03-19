@@ -8,9 +8,6 @@ import multyproc.task.Task;
 
 public class MultyProcessorSystem {
 
-	/**
-	 * Map of dags with arrive time as parameter
-	 */
 	private LinkedHashMap<Long, DAG> dags;
 
 	private class Processor {
