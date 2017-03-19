@@ -8,7 +8,7 @@ import multyproc.task.Task;
 
 public class MultyProcessorSystem {
 
-	private LinkedHashMap<Long, DAG> dags;
+	private TreeMap<Long, DAG> dags;
 
 	private class Processor {
 		
@@ -88,7 +88,7 @@ public class MultyProcessorSystem {
 	private int completedTaskCount;
 	private List<Task> sortedTaskList = new ArrayList<>();
 
-	public MultyProcessorSystem(int processorCount, LinkedHashMap<Long, DAG> dags) {
+	public MultyProcessorSystem(int processorCount, TreeMap<Long, DAG> dags) {
 		if (processorCount <= 0) {
 			throw new IllegalArgumentException("Processor count");
 		}
@@ -100,7 +100,7 @@ public class MultyProcessorSystem {
 	}
 	
 	public void startSimulation() {
-		System.out.println("sorted task list: ");
+		System.out.println("Next task list: ");
 		for (Task task : sortedTaskList) {
 			System.out.println(task);
 		}
@@ -124,7 +124,7 @@ public class MultyProcessorSystem {
 			return;
 		}
 		Map.Entry<Long, DAG> entry = dags.entrySet().iterator().next();
-		if(entry.getKey() >= systemTime) {
+		if(entry.getKey() <= systemTime) {
 			putTasks(entry.getValue().getSortedTaskList());
 			dags.remove(entry.getKey());
 		}
